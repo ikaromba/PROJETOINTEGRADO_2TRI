@@ -24,7 +24,7 @@ const server = http.createServer((req, res) => {
             }
         });
     }
-    else if(req.url === '/Primeiro') {
+    else if(req.url === '/Python') {
         const filePath = path.join(__dirname, 'index1.html')
         fs.readFile(filePath, (err, content) => {
             if (err){
