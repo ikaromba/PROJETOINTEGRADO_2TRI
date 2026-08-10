@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>STM32 Serial Monitor</title>
+</head>
+<body>
+    <button id="btnConectar">Conectar ao STM32</button>
+    <h3>Leitura do Trimpot: <span id="valorADC">0</span></h3>
+
+    <script>
+        document.getElementById('btnConectar').addEventListener('click', async () => {
+            try {
+                // Solicita permissão para abrir a Porta COM
+                const port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 115200 });
+
+                const decoder = new TextDecoderStream();
+                port.readable.pipeTo(decoder.writable);
+                const reader = decoder.readable.getReader();
+
+                let buffer = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += value;
+                    let linhas = buffer.split("\r\n");
+                    
+                    // Processa as linhas completas recebidas
+                    for (let i = 0; i < linhas.length - 1; i++) {
+                        if (linhas[i].trim() !== "") {
+                            try {
+                                const dados = JSON.parse(linhas[i]);
+                                document.getElementById('valorADC').innerText = `${dados.adc} (${dados.volts}V)`;
+                            } catch (e) {
+                                console.log("Linha parcial ou inválida:", linhas[i]);
+                            }
+                        }
+                    }
+                    buffer = linhas[linhas.length - 1];
+                }
+            } catch (err) {
+                console.error("Erro na conexão Serial:", err);
+            }
+        });
+    </script>
+</body>
+</html>

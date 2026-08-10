@@ -24,8 +24,8 @@ const server = http.createServer((req, res) => {
             }
         });
     }
-    else if(req.url === '/Python') {
-        const filePath = path.join(__dirname, 'index1.html')
+    else if(req.url === '/Stm32') {
+        const filePath = path.join(__dirname, 'Stm32_teste.html')
         fs.readFile(filePath, (err, content) => {
             if (err){
                 res.writeHead(500, {'Content-Type': 'text/html'})
