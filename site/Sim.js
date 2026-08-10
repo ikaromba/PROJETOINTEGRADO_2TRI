@@ -9,7 +9,7 @@ const server = http.createServer((req, res) => {
     //200 sucesso, 404 sevidor nao encontrado, 500 erro no servidor, 1xx informativo, 3xx redirecionamento, 4xx erro do cliente
     if(req.url === '/') {
         res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-        res.end('Bem vindo a pagina inicial <br> Use /Ideia para acessar a pagina de login <br> Use /Primeiro para acessar a pagina do primeiro projeto HTML <br> Use /birb para acessar a pagina do birb <br> Use /Erros para acessar a pagina de erros e status');
+        res.end('Bem vindo a pagina inicial <br> http://localhost:3000/Ideia <br> Use /Primeiro para acessar a pagina do primeiro projeto HTML <br> Use /birb para acessar a pagina do birb <br> Use /Erros para acessar a pagina de erros e status');
 
     }
     else if(req.url === '/Ideia') {
