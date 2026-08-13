@@ -11,7 +11,7 @@ class Program
     private static readonly HttpClient client = new HttpClient();
 
     // URL do seu servidor (Node.js ou Python/Flask)
-    private static readonly string SERVER_URL = "http://localhost:3000/predict";
+    private static readonly string SERVER_URL = "http://localhost:5000/predict";
 
     // Buffer para guardar 3 leituras antes de enviar
     private static int countLeituras = 0;

@@ -2,49 +2,35 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>STM32 Serial Monitor</title>
+    <title>Monitoramento de Gasolina - STM32</title>
 </head>
 <body>
-    <button id="btnConectar">Conectar ao STM32</button>
-    <h3>Leitura do Trimpot: <span id="valorADC">0</span></h3>
+    <h2>Monitoramento em Tempo Real</h2>
+    <h3>Média ADC: <span id="valorADC">Aguardando...</span></h3>
+    <h3>Quantidade de Combustível: <span id="litros">0</span> L</h3>
+    <h3>Status: <span id="status">Aguardando dados...</span></h3>
 
     <script>
-        document.getElementById('btnConectar').addEventListener('click', async () => {
+        async function buscarDadosDoServidor() {
             try {
-                // Solicita permissão para abrir a Porta COM
-                const port = await navigator.serial.requestPort();
-                await port.open({ baudRate: 115200 });
-
-                const decoder = new TextDecoderStream();
-                port.readable.pipeTo(decoder.writable);
-                const reader = decoder.readable.getReader();
-
-                let buffer = "";
-
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
+                // Consulta a rota do backend que guarda o último dado vindo do C#
+                const response = await fetch('http://localhost:5000/dados'); 
+                
+                if (response.ok) {
+                    const dados = await response.json();
                     
-                    buffer += value;
-                    let linhas = buffer.split("\r\n");
-                    
-                    // Processa as linhas completas recebidas
-                    for (let i = 0; i < linhas.length - 1; i++) {
-                        if (linhas[i].trim() !== "") {
-                            try {
-                                const dados = JSON.parse(linhas[i]);
-                                document.getElementById('valorADC').innerText = `${dados.adc} (${dados.volts}V)`;
-                            } catch (e) {
-                                console.log("Linha parcial ou inválida:", linhas[i]);
-                            }
-                        }
-                    }
-                    buffer = linhas[linhas.length - 1];
+                    // Atualiza os elementos na tela
+                    document.getElementById('valorADC').innerText = dados.media_recebida || "0";
+                    document.getElementById('litros').innerText = dados.litros || "0";
+                    document.getElementById('status').innerText = dados.status || "Sem sinal";
                 }
             } catch (err) {
-                console.error("Erro na conexão Serial:", err);
+                console.error("Erro ao buscar dados do servidor:", err);
             }
-        });
+        }
+
+        // Executa a busca a cada 1000 milissegundos (1 segundo)
+        setInterval(buscarDadosDoServidor, 1000);
     </script>
 </body>
 </html>
