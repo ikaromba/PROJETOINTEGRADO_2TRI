@@ -10,7 +10,7 @@ class Program
     // Cliente HTTP estático para realizar as requisições para o servidor
     private static readonly HttpClient client = new HttpClient();
 
-    // URL do seu servidor (Node.js ou Python/Flask)
+    // URL do servidor Python/Flask
     private static readonly string SERVER_URL = "http://localhost:5000/predict";
 
     // Buffer para guardar 3 leituras antes de enviar
@@ -22,43 +22,46 @@ class Program
         // i. Estabelecer comunicação com a Porta COM
         SerialPort portaSerial = new SerialPort();
         
-        // AJUSTE AQUI: Altere para a porta que a sua STM32 estiver conectada (ex: COM3, COM4, COM5)
-        portaSerial.PortName = "COM3"; 
-        portaSerial.BaudRate = 115200; // Mesma velocidade configurada na STM32
+        portaSerial.PortName = "COM3"; // Ajuste para a porta COM conectada à STM32
+        portaSerial.BaudRate = 115200;
 
         try
         {
             portaSerial.Open();
             Console.WriteLine($"Conectado com sucesso na porta {portaSerial.PortName}!");
-            Console.WriteLine("Aguardando dados da STM32...");
+            Console.WriteLine("Aguardando pacotes da STM32 (Protocolo Proprietário)...");
 
             // ii. Receber continuamente as leituras provenientes do STM32
             while (true)
             {
-                // Lê uma linha de texto enviada pela STM32 (ex: "4095")
-                string linhaLida = portaSerial.ReadLine().Trim();
+                // Lê uma linha vinda da Serial (Exemplo esperado: "$ADC;3850#")
+                string pacoteBruto = portaSerial.ReadLine().Trim();
 
-                // iii. Organizar e tratar as informações recebidas
-                if (double.TryParse(linhaLida, out double valorAdc))
+                // iii. Organizar e tratar as informações recebidas via Protocolo Proprietário
+                if (ValidarEExtrairProtocolo(pacoteBruto, out double valorAdc))
                 {
                     somaLeituras += valorAdc;
                     countLeituras++;
 
-                    Console.WriteLine($"Leitura [{countLeituras}/3]: {valorAdc}");
+                    Console.WriteLine($"[Protocolo OK] Leitura [{countLeituras}/3]: {valorAdc}");
 
                     // Quando acumula 3 leituras, calcula a média
                     if (countLeituras == 3)
                     {
                         double mediaAdc = somaLeituras / 3.0;
-                        Console.WriteLine($"---> Média calculada das 3 leituras: {mediaAdc:F2}");
+                        Console.WriteLine($"---> Média das 3 leituras: {mediaAdc:F2}");
 
                         // Dispara o envio de forma assíncrona
                         _ = EnviarParaServidorAsync(mediaAdc);
 
-                        // Reseta o contador e a soma para o próximo ciclo
+                        // Reseta o contador e a soma
                         countLeituras = 0;
                         somaLeituras = 0;
                     }
+                }
+                else
+                {
+                    Console.WriteLine($"[Protocolo Inválido]: Pacote descartado -> {pacoteBruto}");
                 }
             }
         }
@@ -73,24 +76,43 @@ class Program
         }
     }
 
+    /// <summary>
+    /// Valida se o pacote recebido atende ao protocolo proprietário ($ADC;VALOR#)
+    /// e extrai o valor numérico.
+    /// </summary>
+    private static bool ValidarEExtrairProtocolo(string pacote, out double valorExtracao)
+    {
+        valorExtracao = 0;
+
+        // 1. Verifica se inicia com '$ADC;' e termina com '#'
+        if (pacote.StartsWith("('v')") && pacote.EndsWith("Bill#"))
+        {
+            
+            string conteudoValor = pacote.Replace("('v')", "").Replace("Bill#", "");
+
+            
+            if (double.TryParse(conteudoValor, out valorExtracao))
+            {
+                return true; // Pacote válido e convertido com sucesso!
+            }
+        }
+
+        return false; // Pacote fora do padrão do protocolo
+    }
+
     // iv. Converter os dados para JSON  &  v. Realizar requisições HTTP
     private static async Task EnviarParaServidorAsync(double mediaVal)
     {
         try
         {
-            // Criando o objeto C#
             var dados = new 
             { 
                 media_adc = mediaVal 
             };
 
-            // Conversão para JSON
             string jsonBody = JsonSerializer.Serialize(dados);
-
-            // Preparando o conteúdo da requisição HTTP POST
             var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-            // Realizando a requisição HTTP POST para o servidor
             HttpResponseMessage response = await client.PostAsync(SERVER_URL, content);
 
             if (response.IsSuccessStatusCode)
