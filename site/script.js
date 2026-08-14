@@ -1,25 +1,20 @@
 let ultimoEstadoMilitar = "";
-let valorAdcSimulado = 2000; // valor inicial do teste 
+let valorAdcSimulado = 2000;
 
-//busca no site
 async function buscarDadosAPI() {
     try {
         const resposta = await fetch('http://127.0.0.1:8000/ultimas-medicoes');
         const dados = await resposta.json();
         
         if (dados.length > 0) {
-            // pega a medição mais recente para atualizar os visores superiores
             const ultima = dados[0];
             atualizarVisoresPainel(ultima.valor_adc, ultima.classificacao_ia, ultima.horario);
-            
-            // atualiza a tabela de histórico inteira com base no que veio do banco/memória 
             atualizarTabelaHistorico(dados);
         }
     } catch (erro) {
         console.log("%c[CONEXÃO RADAR] Procurando sinal do servidor Python...", "color: #ff3333");
     }
 }
-
 
 function atualizarVisoresPainel(valor, classificacao, hora) {
     const elementoValor = document.getElementById('valor-atual');
@@ -31,7 +26,6 @@ function atualizarVisoresPainel(valor, classificacao, hora) {
     
     if (badge) {
         badge.innerText = `// ${classificacao.toUpperCase()}`;
-        // modifica dinamicamente as classes CSS para as cores de alerta tático
         if (classificacao === "Cheio") {
             badge.className = "badge status-badge status-cheio";
         } else if (classificacao === "Médio") {
@@ -41,7 +35,6 @@ function atualizarVisoresPainel(valor, classificacao, hora) {
         }
     }
 
-    // efeito visual de tremor de tela crítico caso mude o status do combustível
     if (ultimoEstadoMilitar !== classificacao && ultimoEstadoMilitar !== "") {
         document.body.classList.add("screen-glitch-active");
         setTimeout(() => document.body.classList.remove("screen-glitch-active"), 400);
@@ -49,12 +42,11 @@ function atualizarVisoresPainel(valor, classificacao, hora) {
     ultimoEstadoMilitar = classificacao;
 }
 
-
 function atualizarTabelaHistorico(listaMedicoes) {
     const tabela = document.getElementById('tabela-historico');
     if (!tabela) return;
     
-    tabela.innerHTML = ""; // limpa para rebuildar nítido
+    tabela.innerHTML = "";
 
     listaMedicoes.forEach(medicao => {
         let corBadgeClass = '';
@@ -72,20 +64,16 @@ function atualizarTabelaHistorico(listaMedicoes) {
     });
 }
 
-
 async function ajustarTanque(variacao) {
-    // calcula o novo valor respeitando o limite tático do ADC (0 a 4095)
     valorAdcSimulado += variacao;
     if (valorAdcSimulado > 4095) valorAdcSimulado = 4095;
     if (valorAdcSimulado < 0) valorAdcSimulado = 0;
 
-    // atualiza o texto interno do painel de controle de simulação
     const debugElement = document.getElementById('debug-simulador');
     if (debugElement) {
         debugElement.innerText = `Valor ADC Interno: ${valorAdcSimulado}`;
     }
 
-    // dispara via POST exatamente o payload esperado no server.py
     try {
         await fetch('http://127.0.0.1:8000/medicao', {
             method: 'POST',
@@ -93,7 +81,6 @@ async function ajustarTanque(variacao) {
             body: JSON.stringify({ valor_adc: valorAdcSimulado })
         });
         
-        // atualiza a tela imediatamente após processar sem esperar o relógio do intervalo
         buscarDadosAPI();
     } catch (erro) {
         console.error("[ERRO NO SIMULADOR] Verifique se o server.py está executando.", erro);
