@@ -2,7 +2,7 @@
 
 # Sistema Integrado de Monitoramento de Variáveis Físicas (IoT + IA)
 
-![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-brightgreen)
+![Status](https://img.shields.io/badge/Status-Andamento%C3%ADdo-brightgreen)
 ![Instituição](https://img.shields.io/badge/ETE_FMC-3º_DS_--_Projeto_Integrado-blue)
 
 > Solução distribuída estilo IoT para aquisição de dados via microcontrolador STM32, ponte de comunicação em C#, API REST com modelo de Inteligência Artificial em Python para classificação automatizada e Dashboard Web para monitoramento em tempo real.
