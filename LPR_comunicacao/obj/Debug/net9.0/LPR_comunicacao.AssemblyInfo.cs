@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LPR_comunicacao")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+60d4bb1da580ccbb6fe22d6d96515a91083607b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6a40b6145265d9384f021750ec2928408b4360cd")]
 [assembly: System.Reflection.AssemblyProductAttribute("LPR_comunicacao")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LPR_comunicacao")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
