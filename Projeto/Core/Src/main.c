@@ -101,9 +101,9 @@ int main(void)
   while (1)
   {
 	  uint32_t valor_final = 0;
-	      char buffer[64]; // Aumentado para comportar os caracteres do protocolo
+	      char buffer[64];
 
-	      // 1. Leitura do ADC (Com ou sem filtro GPIO)
+
 	      HAL_ADC_Start(&hadc1);
 	      if (HAL_ADC_PollForConversion(&hadc1, 10) == HAL_OK)
 	      {
@@ -111,13 +111,13 @@ int main(void)
 	      }
 	      HAL_ADC_Stop(&hadc1);
 
-	      // 2. Formatação com o protocolo proprietário ('v')VALORBill#
+	      //Formatação com o protocolo ('v')VALORBill#
 	      snprintf(buffer, sizeof(buffer), "('v')%luBill#\r\n", valor_final);
 
 	      // 3. Envio via USB CDC[cite: 1]
 	      CDC_Transmit_FS((uint8_t*)buffer, strlen(buffer));
 
-	      HAL_Delay(500); // Envio periódico[cite: 1]
+	      HAL_Delay(5000);
 	      /* USER CODE END WHILE */
     /* USER CODE END WHILE */
 

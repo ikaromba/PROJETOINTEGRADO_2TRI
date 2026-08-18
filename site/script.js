@@ -1,10 +1,66 @@
 let ultimoEstadoMilitar = "";
 let valorAdcSimulado = 2000;
+let meuGrafico = null;
+
+function inicializarGrafico() {
+    const ctx = document.getElementById('graficoTanque');
+    if (!ctx) return;
+
+    meuGrafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Nível ADC',
+                data: [],
+                borderColor: '#0dcaf0',
+                backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 4095,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#ffffff' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#ffffff' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#ffffff' } }
+            }
+        }
+    });
+}
+
+function atualizarGrafico(listaMedicoes) {
+    if (!meuGrafico) return;
+
+    // Inverte o array para exibir a ordem cronológica no gráfico (esquerda -> direita)
+    const dadosOrdenados = [...listaMedicoes].reverse();
+
+    meuGrafico.data.labels = dadosOrdenados.map(m => m.horario);
+    meuGrafico.data.datasets[0].data = dadosOrdenados.map(m => m.valor_adc);
+    meuGrafico.update();
+}
 
 async function buscarDadosAPI() {
     try {
         const resposta = await fetch('http://127.0.0.1:8000/ultimas-medicoes');
-        if (!resposta.ok) return;
+        
+        if (!resposta.ok) {
+            window.location.href = 'Index404.html';
+            return;
+        }
 
         const dados = await resposta.json();
         
@@ -12,9 +68,11 @@ async function buscarDadosAPI() {
             const ultima = dados[0];
             atualizarVisoresPainel(ultima.valor_adc, ultima.classificacao_ia, ultima.horario);
             atualizarTabelaHistorico(dados);
+            atualizarGrafico(dados);
         }
     } catch (erro) {
-        console.log("%c[CONEXÃO RADAR] Procurando sinal do servidor Python...", "color: #ff3333");
+        console.error("[ERRO DE REDE]: Redirecionando para Index404.html", erro);
+        window.location.href = 'Index404.html';
     }
 }
 
@@ -85,19 +143,26 @@ async function ajustarTanque(variacao) {
     }
 
     try {
-        await fetch('http://127.0.0.1:8000/medicao', {
+        const resposta = await fetch('http://127.0.0.1:8000/medicao', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ valor_adc: valorAdcSimulado })
         });
+
+        if (!resposta.ok) {
+            window.location.href = 'Index404.html';
+            return;
+        }
         
         await buscarDadosAPI();
     } catch (erro) {
-        console.error("[ERRO NO SIMULADOR] Verifique se o server.py está executando.", erro);
+        console.error("[ERRO NO SIMULADOR]: Redirecionando...", erro);
+        window.location.href = 'Index404.html';
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    inicializarGrafico();
     buscarDadosAPI();
     setInterval(buscarDadosAPI, 1000);
 });
