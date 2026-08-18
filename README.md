@@ -13,14 +13,14 @@
 
 ---
 
-## 👥 Integrantes do Grupo
+##  Integrantes do Grupo
 
 * **Íkaro** - [@ikaromba](https://github.com/ikaromba)
 * **João Pedro** - [@JPBillGit](https://github.com/JPBillGit)
 
 ---
 
-## 🎥 Demonstração em Vídeo
+## Demonstração em Vídeo
 
 *Vídeo em breve*
 
@@ -28,7 +28,7 @@
 
 ---
 
-## 📐 Arquitetura do Sistema
+##  Arquitetura do Sistema
 
 O fluxo de dados da solução ocorre de forma integrada entre os módulos principais do sistema:
 
