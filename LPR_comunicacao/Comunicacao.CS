@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 class Program
 {
     private static readonly HttpClient client = new HttpClient();
-    private static readonly string SERVER_URL = "http://localhost:5000/predict";
+    
+   
+    private static readonly string SERVER_URL = "http://127.0.0.1:8000/medicao";
 
     private static int countLeituras = 0;
     private static double somaLeituras = 0;
@@ -17,7 +19,7 @@ class Program
     {
         SerialPort portaSerial = new SerialPort
         {
-            PortName = "COM3", // Ajuste para a sua porta COM do STM32[cite: 1]
+            PortName = "COM3", // Ajuste para a sua porta COM do STM32
             BaudRate = 115200,
             ReadTimeout = 2000
         };
@@ -30,7 +32,7 @@ class Program
 
             while (true)
             {
-                // Lê a linha enviada via USB do STM32[cite: 1]
+                // Lê a linha enviada via USB do STM32
                 string pacoteBruto = portaSerial.ReadLine().Trim();
 
                 if (ValidarEExtrairProtocolo(pacoteBruto, out double valorAdc))
@@ -45,7 +47,7 @@ class Program
                         double mediaAdc = somaLeituras / 3.0;
                         Console.WriteLine($"---> Média das 3 leituras: {mediaAdc:F2}");
 
-                        // Envia para o servidor Web em formato JSON[cite: 1]
+                        // Envia a média para o servidor Flask
                         await EnviarParaServidorAsync(mediaAdc);
 
                         countLeituras = 0;
@@ -95,7 +97,8 @@ class Program
     {
         try
         {
-            var dados = new { media_adc = mediaVal };
+           
+            var dados = new { valor_adc = (int)Math.Round(mediaVal) };
             string jsonBody = JsonSerializer.Serialize(dados);
             var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 

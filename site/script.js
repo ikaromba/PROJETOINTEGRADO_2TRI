@@ -4,9 +4,11 @@ let valorAdcSimulado = 2000;
 async function buscarDadosAPI() {
     try {
         const resposta = await fetch('http://127.0.0.1:8000/ultimas-medicoes');
+        if (!resposta.ok) return;
+
         const dados = await resposta.json();
         
-        if (dados.length > 0) {
+        if (Array.isArray(dados) && dados.length > 0) {
             const ultima = dados[0];
             atualizarVisoresPainel(ultima.valor_adc, ultima.classificacao_ia, ultima.horario);
             atualizarTabelaHistorico(dados);
@@ -24,11 +26,13 @@ function atualizarVisoresPainel(valor, classificacao, hora) {
     if (elementoValor) elementoValor.innerText = `[ ${valor} ]`;
     if (elementoHora) elementoHora.innerText = `SYS_TIME // ${hora}`;
     
-    if (badge) {
+    if (badge && classificacao) {
         badge.innerText = `// ${classificacao.toUpperCase()}`;
-        if (classificacao === "Cheio") {
+        const classeLower = classificacao.toLowerCase();
+        
+        if (classeLower.includes('cheio')) {
             badge.className = "badge status-badge status-cheio";
-        } else if (classificacao === "Médio") {
+        } else if (classeLower.includes('médio') || classeLower.includes('medio')) {
             badge.className = "badge status-badge status-medio";
         } else {
             badge.className = "badge status-badge status-baixo";
@@ -50,15 +54,21 @@ function atualizarTabelaHistorico(listaMedicoes) {
 
     listaMedicoes.forEach(medicao => {
         let corBadgeClass = '';
-        if (medicao.classificacao_ia === 'Cheio') corBadgeClass = 'badge-military-success';
-        else if (medicao.classificacao_ia === 'Médio') corBadgeClass = 'badge-military-warning';
-        else corBadgeClass = 'badge-military-danger';
+        const status = (medicao.classificacao_ia || '').toLowerCase();
+
+        if (status.includes('cheio')) {
+            corBadgeClass = 'badge-military-success';
+        } else if (status.includes('médio') || status.includes('medio')) {
+            corBadgeClass = 'badge-military-warning';
+        } else {
+            corBadgeClass = 'badge-military-danger';
+        }
 
         const linha = document.createElement('tr');
         linha.innerHTML = `
             <td><i class="bi bi-terminal me-2"></i>${medicao.horario}</td>
             <td class="fw-bold font-monospace">> TRK_ADC_${medicao.valor_adc}</td>
-            <td><span class="${corBadgeClass}">${medicao.classificacao_ia.toUpperCase()}</span></td>
+            <td><span class="${corBadgeClass}">${(medicao.classificacao_ia || '').toUpperCase()}</span></td>
         `;
         tabela.appendChild(linha);
     });
@@ -81,10 +91,13 @@ async function ajustarTanque(variacao) {
             body: JSON.stringify({ valor_adc: valorAdcSimulado })
         });
         
-        buscarDadosAPI();
+        await buscarDadosAPI();
     } catch (erro) {
         console.error("[ERRO NO SIMULADOR] Verifique se o server.py está executando.", erro);
     }
 }
 
-setInterval(buscarDadosAPI, 1000);
+document.addEventListener('DOMContentLoaded', () => {
+    buscarDadosAPI();
+    setInterval(buscarDadosAPI, 1000);
+});

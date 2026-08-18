@@ -58,8 +58,8 @@ all: main-build
 main-build: Projeto.elf secondary-outputs
 
 # Tool invocations
-Projeto.elf: $(OBJS) $(USER_OBJS) C:\stm36_2026\Projeto\STM32F103C8TX_FLASH.ld
-	arm-none-eabi-gcc -o "Projeto.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\stm36_2026\Projeto\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Projeto.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Projeto.elf: $(OBJS) $(USER_OBJS) C:\Users\caval\Desktop\Projeto\ Integrado\ do\ github\PROJETOINTEGRADO_2TRI-main\Projeto\STM32F103C8TX_FLASH.ld
+	arm-none-eabi-gcc -o "Projeto.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\caval\Desktop\Projeto Integrado do github\PROJETOINTEGRADO_2TRI-main\Projeto\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Projeto.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
