@@ -22,7 +22,9 @@
 
 ## Demonstração em Vídeo
 
-[![Demonstração do Projeto](https://img.youtube.com/vi/ejJNGc2txm4/maxresdefault.jpg)](https://youtu.be/ejJNGc2txm4)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/ejJNGc2txm4)
+
+**[Clique aqui para assistir à apresentação no YouTube](https://youtu.be/ejJNGc2txm4)**
 
 ---
 
